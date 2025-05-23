@@ -1,77 +1,57 @@
 def ft_statistics(*args, **kwargs) -> None:
-    """
-    Computes and prints statistical measures based on numerical inputs.
-
-    Accepts any number of positional arguments (numbers) and performs
-    statistical calculations depending on the values of any keyword arguments.
-
-    Valid keyword values:
-        "mean"               → prints the mean of the input numbers.
-        "median"             → prints the median.
-        "quartile"           → prints 1st and 3rd quartiles (25%, 75%).
-        "standard_deviation" or "std" → prints the standard deviation.
-        "variance" or "var"  → prints the variance.
-
-    All other keyword values are ignored.
-
-    Example:
-        >>> ft_statistics(1, 2, 3, 4, 5, foo="mean", bar="median")
-    """
     import math
 
-    def Mean(values):
-        return sum(values) / len(values)
+    def is_valid_data(data):
+        return data and all(isinstance(el, (int, float)) for el in data)
 
-    def Median(values):
-        sorted_vals = sorted(values)
-        n = len(sorted_vals)
+    def mean(data):
+        return sum(data) / len(data)
+
+    def median(data):
+        sorted_data = sorted(data)
+        n = len(sorted_data)
         mid = n // 2
-        return (sorted_vals[mid - 1] + sorted_vals[mid]) / 2 if n % 2 == 0 else sorted_vals[mid]
+        if n % 2 == 0:
+            return (sorted_data[mid - 1] + sorted_data[mid]) / 2
+        return sorted_data[mid]
 
-    def Quartile(values):
-        sorted_vals = sorted(values)
-        n = len(sorted_vals)
+    def quartile(data):
+        sorted_data = sorted(data)
+        n = len(sorted_data)
         mid = n // 2
-        lower = sorted_vals[:mid]
-        upper = sorted_vals[mid:] if n % 2 == 0 else sorted_vals[mid + 1:]
-        return Median(lower), Median(upper)
 
-    def Standard_Deviation(values):
-        m = Mean(values)
-        return math.sqrt(sum((x - m) ** 2 for x in values) / len(values))
+        lower = sorted_data[:mid]
+        upper = sorted_data[mid:] if n % 2 == 0 else sorted_data[mid + 1:]
 
-    def Variance(values):
-        m = Mean(values)
-        return sum((x - m) ** 2 for x in values) / len(values)
+        def med(d):
+            m = len(d)
+            return (d[m // 2 - 1] + d[m // 2]) / 2 if m % 2 == 0 else d[m // 2]
 
-    if not args:
-        print("ERROR: No values provided.")
+        return [med(lower), med(upper)]
+
+    def std(data):
+        m = mean(data)
+        return math.sqrt(sum((x - m) ** 2 for x in data) / len(data))
+
+    def var(data):
+        m = mean(data)
+        return sum((x - m) ** 2 for x in data) / len(data)
+
+    if not is_valid_data(args):
+        for _ in kwargs:
+            print("ERROR")
         return
 
-    # Validate all values are numeric
-    try:
-        args = [float(x) for x in args]
-    except ValueError:
-        print("ERROR: All arguments must be numbers.")
-        return
-
-    # Mapping accepted keyword values to functions
-    operations = {
-        "mean": lambda: print(f"mean: {Mean(args)}"),
-        "median": lambda: print(f"median: {Median(args)}"),
-        "quartile": lambda: print(f"quartile (25%, 75%): {Quartile(args)[0]}, {Quartile(args)[1]}"),
-        "standard_deviation": lambda: print(f"standard deviation: {Standard_Deviation(args)}"),
-        "std": lambda: print(f"standard deviation: {Standard_Deviation(args)}"),
-        "variance": lambda: print(f"variance: {Variance(args)}"),
-        "var": lambda: print(f"variance: {Variance(args)}"),
+    mapping = {
+        "mean": lambda: print(f"mean : {mean(args)}"),
+        "median": lambda: print(f"median : {median(args)}"),
+        "quartile": lambda: print(f"quartile : {quartile(args)}"),
+        "std": lambda: print(f"std : {std(args)}"),
+        "var": lambda: print(f"var : {var(args)}"),
     }
 
-    found = False
-    for val in kwargs.values():
-        func = operations.get(val)
-        if func:
-            func()
-            found = True
-
-    if not found:
-        print("ERROR: No valid statistical operation requested.")
+    for key in kwargs.values():
+        if key in mapping:
+            mapping[key]()
+        else:
+            print("ERROR")
